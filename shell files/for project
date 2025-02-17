@@ -1,0 +1,25 @@
+# udev rule for usb port
+etc/udev/rules.d/99-can.rules
+
+# for auto login and and running script: 
+/etc/systemd/system/motor.service 
+
+# what inside this file for reference: 
+ 
+: '
+[Unit]
+Description=Start CAN interface and Rover on boot
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/creed/run_jetson_code.sh
+Restart=on-failure
+User=creed
+Environment="ROS_DOMAIN_ID=42"  #Ros id for both jetson and on the vm pc
+
+[Install]
+WantedBy=multi-user.target
+
+'
+
