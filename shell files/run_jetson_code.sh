@@ -7,4 +7,6 @@ source /opt/ros/foxy/setup.bash
 
 /home/creed/generic_socketcan_start.sh
 
-/home/creed/ros2_ws/build/Motor-Test
+#/home/creed/ros2_ws/build/Motor-Test
+
+/home/creed/2025_Lunabotics_Creed_Main_Code/build/Motor-Test
