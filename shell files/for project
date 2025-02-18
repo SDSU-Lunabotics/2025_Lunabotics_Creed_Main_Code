@@ -1,5 +1,7 @@
 # udev rule for usb port
 etc/udev/rules.d/99-can.rules
+# to check the rules
+cat /etc/udev/rules.d/99-can.rules
 
 # for auto login and and running script: 
 /etc/systemd/system/motor.service 

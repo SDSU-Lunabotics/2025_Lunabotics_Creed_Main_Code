@@ -24,7 +24,7 @@ find_package(rosidl_typesupport_fastrtps_cpp REQUIRED)
 add_definitions(-DUNIT_LIB_DISABLE_FMT -DUNIT_LIB_ENABLE_IOSTREAM)
 
 # Add all CPP files to the executable
-add_executable(${PROJECT_NAME} src/main.cpp src/RobotBase.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/RobotBase.cpp src/driveterrain.cpp)
 
 # Link against required libraries
 target_include_directories(${PROJECT_NAME} PUBLIC
