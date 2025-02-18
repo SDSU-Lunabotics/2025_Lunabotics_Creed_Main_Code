@@ -102,7 +102,7 @@ This project controls a motor using a USB-to-CAN adapter on a Jetson board with 
 ## Summary
 
 - **On Boot:**  
-  The Jetson’s systemd service runs the startup script. The udev rule ensures the CAN adapter is available as `/dev/ttyCAN`, and the script brings up the CAN interface and launches the motor control code automatically.
+  The Jetson’s systemd service runs the startup script. The udev rule ensures the CAN adapter is available as `/dev/can0`, and the script brings up the CAN interface and launches the motor control code automatically.
   
 - **Remote Control:**  
   As long as the Jetson and laptop are on the same network and share the same `ROS_DOMAIN_ID`, the Jetson will receive joystick commands from the laptop (via the joy node), enabling remote control of the motor.
@@ -119,5 +119,10 @@ This project controls a motor using a USB-to-CAN adapter on a Jetson board with 
   ```bash
   sudo nano run_jetson_code.sh
   chmod +x run_jetson_code.sh
+  ```
+  Since service is already running and you want to apply the update, you must run this next:
+  ```bash
+  sudo systemctl daemon-reload
+  sudo systemctl restart motor.service
   ```
 
