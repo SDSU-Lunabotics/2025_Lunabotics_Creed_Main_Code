@@ -51,8 +51,8 @@ void DriveTerrain::EnabledInit() {
 
 void DriveTerrain::EnabledPeriodic() {
     if (latest_joy_received_) {
-        if (latest_joy_msg_.axes.size() > 4) {
-            double speed = -latest_joy_msg_.axes[4];  // Use right stick vertical for forward/backward
+        if (latest_joy_msg_.axes.size() > 1) {
+            double speed = -latest_joy_msg_.axes[1];  // Use left stick vertical for forward/backward
             motorOut_.Output = speed;
         } else {
             RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
