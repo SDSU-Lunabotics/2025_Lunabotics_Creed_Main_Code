@@ -1,6 +1,4 @@
-#include "Deposition.hpp"
-
-using namespace ctre::phoenix6;
+#include "deposition.hpp"
 
 Deposition::Deposition() 
   : Node("deposition_node"), button_a_prev_(false), toggle_state_(false)
@@ -9,14 +7,19 @@ Deposition::Deposition()
     subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "joy", 10,
         std::bind(&Deposition::joyCallback, this, std::placeholders::_1));
+
+        // Create a timer that calls EnabledPeriodic() every 20 milliseconds.
+    timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(20),
+        std::bind(&Deposition::EnabledPeriodic, this)
+    );
 }
 
 void Deposition::RobotInit() {
-    // Optionally configure the deposition motors.
     configs::TalonFXConfiguration cfg{};
     cfg.MotorOutput.Inverted = signals::InvertedValue::CounterClockwise_Positive;
-    auto res1 = regolith_collector.GetConfigurator().Apply(cfg);
-    auto res2 = regolith_dump.GetConfigurator().Apply(cfg);
+    auto res1 = regolith_collector_.GetConfigurator().Apply(cfg);
+    auto res2 = regolith_dump_.GetConfigurator().Apply(cfg);
     if (!res1.IsOK() || !res2.IsOK()) {
         RCLCPP_ERROR(this->get_logger(), "Failed to configure deposition motors");
     } else {
@@ -39,19 +42,19 @@ void Deposition::EnabledInit() {
 void Deposition::EnabledPeriodic() {
     // Toggle motor output based on the internal toggle state.
     if (toggle_state_) {
-        // Run motors at a set duty cycle (e.g., 50% output); adjust as needed.
+        // Run motors at a set duty cycle ( 50% output);
         depositionMotorOut_.Output = 0.5;
     } else {
         depositionMotorOut_.Output = 0.0;
     }
     // Set both motors with the same control command.
-    regolith_collector.SetControl(depositionMotorOut_);
-    regolith_dump.SetControl(depositionMotorOut_);
+    regolith_collector_.SetControl(depositionMotorOut_);
+    regolith_dump_.SetControl(depositionMotorOut_);
 }
 
 void Deposition::DisabledInit() {
-    regolith_collector.SetControl(controls::NeutralOut{});
-    regolith_dump.SetControl(controls::NeutralOut{});
+    regolith_collector_.SetControl(controls::NeutralOut{});
+    regolith_dump_.SetControl(controls::NeutralOut{});
 }
 
 void Deposition::DisabledPeriodic() {

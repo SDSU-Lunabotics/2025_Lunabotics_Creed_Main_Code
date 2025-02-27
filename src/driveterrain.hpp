@@ -3,8 +3,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "ctre/phoenix6/TalonFX.hpp"
-#include "RobotBase.hpp"  // Your existing RobotBase interface
+#include "RobotBase.hpp"
+#include "constants.hpp" 
 #include <cmath>
+#include <chrono>
 
 using namespace ctre::phoenix6;
 
@@ -24,17 +26,20 @@ public:
 private:
     void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
 
-    static constexpr char const *CANBUS_NAME = "can0";
-    // Left back motor (leader) with ID 1
-    hardware::TalonFX leftBackMotor_{1, CANBUS_NAME};
-    // Left front motor (follower) with ID 5
-    hardware::TalonFX leftFrontMotor_{5, CANBUS_NAME};
-    // Right back motor (leader) with ID #
-    hardware::TalonFX rightBackMotor_{#, CANBUS_NAME};
-    // Right front motor (follower) with ID #
-    hardware::TalonFX rightFrontMotor_{#, CANBUS_NAME};
-    controls::DutyCycleOut motorOut_{0};
+    // Left side motors (leader and follower)
+    hardware::TalonFX leftBackMotor_{11, CANBUS_NAME};   // leader
+    hardware::TalonFX leftFrontMotor_{1, CANBUS_NAME};  // follower
+
+    // Right side motors (leader and follower)
+    hardware::TalonFX rightBackMotor_{10, CANBUS_NAME};   // leader 
+    hardware::TalonFX rightFrontMotor_{6, CANBUS_NAME};  // follower 
+
+    // duty cycle outputs for left and right sides
+    controls::DutyCycleOut leftMotorOut_{0};
+    controls::DutyCycleOut rightMotorOut_{0};
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
     sensor_msgs::msg::Joy latest_joy_msg_;
     bool latest_joy_received_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
 };
