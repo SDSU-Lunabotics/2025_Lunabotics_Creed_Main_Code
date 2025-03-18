@@ -1,25 +1,25 @@
-#include "driveterrain.hpp"
+#include "drivetrain.hpp"
 
-DriveTerrain::DriveTerrain()
-  : Node("robot_node"), latest_joy_received_(false)
+DriveTrain::DriveTrain()
+  : Node("drivetrain_node"), latest_joy_received_(false)
 {
     // Subscribe to the joy topic.
     subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "joy", 10,
-        std::bind(&DriveTerrain::joyCallback, this, std::placeholders::_1));
+        std::bind(&DriveTrain::joyCallback, this, std::placeholders::_1));
 
-        // Create a timer that calls EnabledPeriodic() every 20 milliseconds.
-    timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(20),
-        std::bind(&DriveTerrain::EnabledPeriodic, this)
-    );
+                // Create a timer that calls EnabledPeriodic() every 20 milliseconds.
+    // timer_ = this->create_wall_timer(
+    //     std::chrono::milliseconds(20),
+    //     std::bind(&DriveTrain::EnabledPeriodic, this)
+    // );
 }
 
-void DriveTerrain::RobotInit() {
+void DriveTrain::RobotInit() {
     configs::TalonFXConfiguration fx_cfg{};
     fx_cfg.MotorOutput.Inverted = signals::InvertedValue::CounterClockwise_Positive;
     fx_cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-    fx_cfg.CurrentLimits.SupplyCurrentLimit = units::current::ampere_t(5.17);
+    fx_cfg.CurrentLimits.SupplyCurrentLimit = units::current::ampere_t(10);
 
     // Configure left side motors.
     auto resultLeftBack = leftBackMotor_.GetConfigurator().Apply(fx_cfg);
@@ -44,19 +44,19 @@ void DriveTerrain::RobotInit() {
     rightFrontMotor_.SetControl(controls::Follower{rightBackMotor_.GetDeviceID(), false});
 }
 
-void DriveTerrain::RobotPeriodic() {
+void DriveTrain::RobotPeriodic() {
     // Add any periodic tasks if needed.
 }
 
-bool DriveTerrain::IsEnabled() {
+bool DriveTrain::IsEnabled() {
     return latest_joy_received_;
 }
 
-void DriveTerrain::EnabledInit() {
-    RCLCPP_INFO(this->get_logger(), "DriveTerrain ENABLED");
+void DriveTrain::EnabledInit() {
+    RCLCPP_INFO(this->get_logger(), "DriveTrain ENABLED");
 }
 
-void DriveTerrain::EnabledPeriodic() {
+void DriveTrain::EnabledPeriodic() {
     if (latest_joy_received_) {
         if (latest_joy_msg_.axes.size() > 4) {
             // Left side: use left stick vertical (e.g. axis 1).
@@ -81,16 +81,16 @@ void DriveTerrain::EnabledPeriodic() {
     rightBackMotor_.SetControl(rightMotorOut_);
 }
 
-void DriveTerrain::DisabledInit() {
-    RCLCPP_INFO(this->get_logger(), "DriveTerrain DISABLED");
+void DriveTrain::DisabledInit() {
+    RCLCPP_INFO(this->get_logger(), "DriveTrain DISABLED");
 }
 
-void DriveTerrain::DisabledPeriodic() {
+void DriveTrain::DisabledPeriodic() {
     leftBackMotor_.SetControl(controls::NeutralOut{});
     rightBackMotor_.SetControl(controls::NeutralOut{});
 }
 
-void DriveTerrain::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
+void DriveTrain::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
     latest_joy_msg_ = *msg;
     latest_joy_received_ = true;
 }

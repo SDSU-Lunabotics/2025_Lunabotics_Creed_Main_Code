@@ -1,18 +1,16 @@
 #include "deposition.hpp"
 
 Deposition::Deposition() 
-  : Node("deposition_node"), button_a_prev_(false), toggle_state_(false)
+  : Node("deposition_node"),
+    latest_joy_received_(false),
+    collector_button_prev_(false), collector_toggle_state_(false),
+    dump_button_prev_(false), dump_toggle_state_(false)
 {
-    // Subscribe to joystick messages.
+    // Subscribe to joystick messages (using the raw "joy" topic or a filtered topic if desired).
     subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "joy", 10,
         std::bind(&Deposition::joyCallback, this, std::placeholders::_1));
 
-        // Create a timer that calls EnabledPeriodic() every 20 milliseconds.
-    timer_ = this->create_wall_timer(
-        std::chrono::milliseconds(20),
-        std::bind(&Deposition::EnabledPeriodic, this)
-    );
 }
 
 void Deposition::RobotInit() {
@@ -40,16 +38,20 @@ void Deposition::EnabledInit() {
 }
 
 void Deposition::EnabledPeriodic() {
-    // Toggle motor output based on the internal toggle state.
-    if (toggle_state_) {
-        // Run motors at a set duty cycle ( 50% output);
-        depositionMotorOut_.Output = 0.5;
+    // Set the duty cycle for each motor independently based on its toggle state.
+    if (collector_toggle_state_) {
+        collectorOutput_.Output = 0.5;
     } else {
-        depositionMotorOut_.Output = 0.0;
+        collectorOutput_.Output = 0.0;
     }
-    // Set both motors with the same control command.
-    regolith_collector_.SetControl(depositionMotorOut_);
-    regolith_dump_.SetControl(depositionMotorOut_);
+    if (dump_toggle_state_) {
+        dumpOutput_.Output = 0.5;
+    } else {
+        dumpOutput_.Output = 0.0;
+    }
+    // Apply commands to each motor.
+    regolith_collector_.SetControl(collectorOutput_);
+    regolith_dump_.SetControl(dumpOutput_);
 }
 
 void Deposition::DisabledInit() {
@@ -62,16 +64,24 @@ void Deposition::DisabledPeriodic() {
 }
 
 void Deposition::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
-    bool button_a_current = false;
-    if (!msg->buttons.empty()) {
-        button_a_current = (msg->buttons[0] == 1);  // Assuming button A is at index 0. need to test first !!!!
+    // Ensure the message contains at least two buttons.
+    if (msg->buttons.size() < 2) return;
 
+    // For the regolith collector (button 0)
+    bool collector_button_current = (msg->buttons[0] == 1);
+    if (collector_button_current && !collector_button_prev_) {
+        collector_toggle_state_ = !collector_toggle_state_;
+        RCLCPP_INFO(this->get_logger(), "Regolith Collector toggled: %s",
+                    collector_toggle_state_ ? "ON" : "OFF");
     }
-    // Rising-edge detection: if button is pressed now but wasn't before, toggle.
-    if (button_a_current && !button_a_prev_) {
-        toggle_state_ = !toggle_state_;
-        RCLCPP_INFO(this->get_logger(), "Deposition motors toggled: %s", toggle_state_ ? "ON" : "OFF");
+    collector_button_prev_ = collector_button_current;
+
+    // For the regolith dump (button 1)
+    bool dump_button_current = (msg->buttons[1] == 1);
+    if (dump_button_current && !dump_button_prev_) {
+        dump_toggle_state_ = !dump_toggle_state_;
+        RCLCPP_INFO(this->get_logger(), "Regolith Dump toggled: %s",
+                    dump_toggle_state_ ? "ON" : "OFF");
     }
-    button_a_prev_ = button_a_current;
+    dump_button_prev_ = dump_button_current;
 }
-

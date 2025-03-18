@@ -10,9 +10,9 @@
 
 using namespace ctre::phoenix6;
 
-class DriveTerrain : public RobotBase, public rclcpp::Node {
+class DriveTrain : public RobotBase, public rclcpp::Node {
 public:
-    DriveTerrain();
+    DriveTrain();
 
     // RobotBase interface methods:
     void RobotInit() override;
@@ -27,12 +27,12 @@ private:
     void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg);
 
     // Left side motors (leader and follower)
-    hardware::TalonFX leftBackMotor_{11, CANBUS_NAME};   // leader
+    hardware::TalonFX leftBackMotor_{5, CANBUS_NAME};   // leader
     hardware::TalonFX leftFrontMotor_{1, CANBUS_NAME};  // follower
 
     // Right side motors (leader and follower)
-    hardware::TalonFX rightBackMotor_{10, CANBUS_NAME};   // leader 
-    hardware::TalonFX rightFrontMotor_{6, CANBUS_NAME};  // follower 
+    hardware::TalonFX rightBackMotor_{11, CANBUS_NAME};   // leader 
+    hardware::TalonFX rightFrontMotor_{2, CANBUS_NAME};  // follower 
 
     // duty cycle outputs for left and right sides
     controls::DutyCycleOut leftMotorOut_{0};
@@ -41,5 +41,5 @@ private:
     sensor_msgs::msg::Joy latest_joy_msg_;
     bool latest_joy_received_;
 
-    rclcpp::TimerBase::SharedPtr timer_;
+   //rclcpp::TimerBase::SharedPtr timer_;
 };
