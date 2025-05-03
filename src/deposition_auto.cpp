@@ -40,7 +40,7 @@ void Deposition::EnabledInit() {
 void Deposition::EnabledPeriodic() {
     // Set the duty cycle for each motor independently based on its toggle state.
     if (collector_toggle_state_) {
-        collectorOutput_.Output = 0.5;
+        collectorOutput_.Output = -0.5;
     } else {
         collectorOutput_.Output = 0.0;
     }
