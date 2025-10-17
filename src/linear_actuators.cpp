@@ -121,7 +121,7 @@ void LinearActuators::RobotInit() {
 }
 
 void LinearActuators::RobotPeriodic() {
-    // Optional: add any periodic tasks if needed.
+    
 }
 
 bool LinearActuators::IsEnabled() {
@@ -134,13 +134,12 @@ void LinearActuators::EnabledInit() {
 
 void LinearActuators::EnabledPeriodic() {
     double command = 0.0;
-    // Ensure the joystick message has enough axes (need index 3 and 6).
     if (latest_joy_received_ && latest_joy_msg_.axes.size() > 6) {
-        // Use RT (axis 3) and LT (axis 6) to determine the command.
+        //  RT (axis 3) and LT (axis 6) 
         double rt_value = latest_joy_msg_.axes[3];
         double lt_value = latest_joy_msg_.axes[6];
-        // Compute command as difference. Adjust signs as needed.
-        command = rt_value - lt_value;
+
+      command = rt_value - lt_value;
     }
     actuatorOutput_.Output = command;
     // Command the leader motor. The follower will mirror automatically.
@@ -153,11 +152,10 @@ void LinearActuators::DisabledInit() {
 }
 
 void LinearActuators::DisabledPeriodic() {
-    // No additional actions required.
+    // No  actions
 }
 
 void LinearActuators::joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg) {
-    // Make sure there are enough axes before using them.
     if (msg->axes.size() <= 6) return;
     latest_joy_msg_ = *msg;
     latest_joy_received_ = true;
